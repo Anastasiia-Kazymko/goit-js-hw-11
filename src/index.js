@@ -1,9 +1,8 @@
 import './sass/main.scss';
 import Notiflix from 'notiflix';
-//import axios from 'axios';
-//import SimpleLightbox from "simplelightbox";
-//import "simplelightbox/dist/simple-lightbox.min.css";
+
 import API from './fetch-pictures';
+import { appendHitsMarkup } from './markup-of-pictures';
 
 const refs = {
     form: document.querySelector('#search-form'),
@@ -11,8 +10,8 @@ const refs = {
     gallery: document.querySelector('.gallery'),
     loadMoreBtn: document.querySelector('.load-more'),
 };
-
 const api = new API();
+let numberOfPictures = null;
 
 refs.form.addEventListener('submit', onSearch);
 refs.loadMoreBtn.addEventListener('click', onLoadMore);
@@ -29,6 +28,13 @@ function onSearch(e) {
         clearHitsContainer();
         appendHitsMarkup(hits)
         showLoadMoreBtn();
+      
+      numberOfPictures = hits.hits.length; 
+      if (hits.hits.length === 0) {
+        Notiflix.Notify.failure(`Sorry, there are no images matching your search query. Please try again.`);
+        return
+      }
+    Notiflix.Notify.success(`Hooray! We found ${hits.totalHits} images.`);
     });
 };
 
@@ -37,28 +43,15 @@ function onLoadMore() {
     api.fetchPictures().then(hits => {
         appendHitsMarkup(hits)
         showLoadMoreBtn();
-    });
-}
 
-function appendHitsMarkup(hits) {
-    const pictures = hits.map((picture) => `<div class="photo-card">
-  <img src="${picture.webformatURL}" alt="${picture.tags}" loading="lazy" width="300" height="200"/>
-  <div class="info">
-    <p class="info-item">
-      <b>Likes ${picture.likes}</b>
-    </p>
-    <p class="info-item">
-      <b>Views ${picture.views}</b>
-    </p>
-    <p class="info-item">
-      <b>Comments ${picture.comments}</b>
-    </p>
-    <p class="info-item">
-      <b>Downloads ${picture.downloads}</b>
-    </p>
-  </div>
-</div>`).join("");
-        refs.gallery.insertAdjacentHTML('beforeend', pictures); 
+      numberOfPictures += hits.hits.length;
+           
+      if (numberOfPictures === hits.totalHits) {        
+        Notiflix.Notify.failure(`We're sorry, but you've reached the end of search results.`);
+        hideLoadMoreBtn();
+        return
+      }
+    });
 }
 
 function hideLoadMoreBtn() {
@@ -72,3 +65,7 @@ function showLoadMoreBtn() {
 function clearHitsContainer() {
     refs.gallery.innerHTML = '';
 }
+
+
+
+    
