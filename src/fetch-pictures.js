@@ -11,7 +11,7 @@ export default class API {
 
   async fetchPictures() { 
     //console.log(this);
-    const url = `${BASE_URL}?key=${API_KEY}&q=${this.elSearch}&image_type=photo&orientation=horizontal&safesearch=true&per_page=40&page=${this.page}`;
+    const url = `${BASE_URL}?key=${API_KEY}&q=${this.elSearch}&image_type=photo&orientation=horizontal&safesearch=true&per_page=4&page=${this.page}`;
 
     return await axios.get(url).then(object => {
       console.log(object.data);
