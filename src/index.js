@@ -22,7 +22,11 @@ function onSearch(e) {
     e.preventDefault();    
     
     api.query = e.currentTarget.elements.searchQuery.value.trim();
-    
+
+  if (api.query === "") {
+    Notiflix.Notify.warning('Please fill in the field');
+    return;
+  }    
     api.resetPage();
     api.fetchPictures().then(hits => {
         clearHitsContainer();
