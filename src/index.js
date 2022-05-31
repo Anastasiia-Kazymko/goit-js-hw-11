@@ -8,13 +8,14 @@ const refs = {
     form: document.querySelector('#search-form'),
     input: document.querySelector('input'),
     gallery: document.querySelector('.gallery'),
-    loadMoreBtn: document.querySelector('.load-more'),
+  loadMoreBtn: document.querySelector('.load-more'),
+    sentinel: document.querySelector('.sentinel')
 };
 const api = new API();
 let numberOfPictures = null;
 
 refs.form.addEventListener('submit', onSearch);
-refs.loadMoreBtn.addEventListener('click', onLoadMore);
+//refs.loadMoreBtn.addEventListener('click', onLoadMore);
 
 hideLoadMoreBtn();
 
@@ -31,7 +32,7 @@ function onSearch(e) {
     api.fetchPictures().then(hits => {
         clearHitsContainer();
         appendHitsMarkup(hits)
-        showLoadMoreBtn();
+        //showLoadMoreBtn();
       
       numberOfPictures = hits.hits.length; 
       if (hits.hits.length === 0) {
@@ -43,12 +44,41 @@ function onSearch(e) {
     });
 };
 
-function onLoadMore() {   
-    hideLoadMoreBtn();
-    api.fetchPictures().then(hits => {
-        appendHitsMarkup(hits)
-        showLoadMoreBtn();
+//function onLoadMore() {   
+//    hideLoadMoreBtn();
+//    api.fetchPictures().then(hits => {
+//        appendHitsMarkup(hits)
+//        showLoadMoreBtn();
+//
+//      numberOfPictures += hits.hits.length;
+ //          
+//      if (numberOfPictures === hits.totalHits) {        
+//        Notiflix.Notify.failure(`We're sorry, but you've reached the end of search results.`);
+//        hideLoadMoreBtn();
+//        return
+//      }
+//    });
+//}
 
+function hideLoadMoreBtn() {
+    refs.loadMoreBtn.classList.add("is-hidden");
+}
+
+//function showLoadMoreBtn() {
+//    refs.loadMoreBtn.classList.remove("is-hidden");
+//}
+
+function clearHitsContainer() {
+    refs.gallery.innerHTML = '';
+}
+
+const onEntry = entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting && api.query !== "") {
+      console.log("Пора грузить картинки");
+      api.fetchPictures().then(hits => {
+        appendHitsMarkup(hits)
+        console.log(hits);
       numberOfPictures += hits.hits.length;
            
       if (numberOfPictures === hits.totalHits) {        
@@ -57,20 +87,12 @@ function onLoadMore() {
         return
       }
     });
+    }
+  });
 }
 
-function hideLoadMoreBtn() {
-    refs.loadMoreBtn.classList.add("is-hidden");
+const options = {  
+  rootMargin: '50px', 
 }
-
-function showLoadMoreBtn() {
-    refs.loadMoreBtn.classList.remove("is-hidden");
-}
-
-function clearHitsContainer() {
-    refs.gallery.innerHTML = '';
-}
-
-
-
-    
+const observer = new IntersectionObserver(onEntry, options);
+observer.observe(refs.sentinel);
